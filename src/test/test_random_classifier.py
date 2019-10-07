@@ -1,20 +1,13 @@
 from unittest import TestCase
 from src.main.random_classifier import *
-from src.main.data_import import *
 import numpy as np
 
 class TestRandomClassifier(TestCase):
 
-    def save_predictions(self):
+    def test_save_predictions(self):
         data_import = DataImport()
-        train_data = data_import.get_train_data_as_tuple()
-        clean_train_data = data_import.get_clean_data_set_as_array(train_data)
-        test_data = data_import.get_test_data_as_list()
-        predictions = RandomClassifier(clean_train_data).predict(test_data)
-        indexes = np.arange(0, len(predictions))
-        preds = np.transpose(np.array([indexes, predictions]))
-        print(preds)
-        np.savetxt("random_classifier_predictions.csv", preds, fmt="%s")
+        clean_train_data = data_import.get_clean_data_set_as_array(data_import.get_train_data_as_tuple())
+        RandomClassifier(clean_train_data).save_predictions(data_import.get_test_data_as_list())
 
     def test_predictions(self):
         train_data = np.ones((10, 2))
@@ -41,5 +34,10 @@ class TestRandomClassifier(TestCase):
             test_data[j, -1] = random.choice(labels)
 
         classifier = RandomClassifier(train_data)
-        error_rate = classifier.get_error(test_data)
-        self.assertIs(type(error_rate), np.float64)
+
+        error_rate = []
+        for j in range(100):
+            error_rate.append(classifier.get_error(test_data))
+
+        average_error_rate = np.mean(error_rate)
+        self.assertIs(type(average_error_rate), np.float64)
