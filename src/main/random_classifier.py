@@ -30,7 +30,4 @@ class RandomClassifier:
 
         preds = np.column_stack((indexes, predictions))
 
-        for (i, row) in enumerate(preds):
-            row[0] += ','
-
-        np.savetxt("random_classifier_predictions.csv", preds, fmt="%s")
+        np.savetxt("random_classifier_predictions.csv", preds, fmt="%s", delimiter=',')
