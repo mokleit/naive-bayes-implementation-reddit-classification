@@ -62,4 +62,24 @@ class TestNaivesBayesClassifier(TestCase):
         classifier.train()
         self.assertEqual(expected, classifier.posteriors)
 
+    def test_predict(self):
+        data = np.array([['feet', 'name'], ['cats', 'name'], ['wolves', 'surprise'], ['talked', 'surprise'], ['caresses', 'caress']])
+        classifier = NaiveBayesClassifier(data)
+        test_data = [['caresses'], ['feet cats foot'], ['talked wolves']]
+        expected = ['caress', 'name', 'surprise']
+        classifier.train()
+        actual = classifier.predict(test_data)
+        self.assertEqual(expected, actual)
+
+    def test_predict_with_unexisting_words(self):
+        data = np.array([['feet', 'body'], ['cats', 'animal'], ['wolves', 'animal'], ['mouth', 'body'], ['obama macron trudeau', 'politics']])
+        classifier = NaiveBayesClassifier(data)
+        test_data = [['foot foot mouth'], ['cats foot wolf wolf'], ['obama trudeau merkel']]
+        expected = ['body', 'animal', 'animal']
+        classifier.train()
+        actual = classifier.predict(test_data)
+        self.assertEqual(expected, actual)
+
+
+
 

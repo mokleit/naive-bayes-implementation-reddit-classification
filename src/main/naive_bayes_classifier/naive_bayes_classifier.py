@@ -24,8 +24,33 @@ class NaiveBayesClassifier:
         for i in range(len(docs_by_label)):
             self.compute_posteriors(docs_by_label[i], i)
 
+    def predict(self, test_data):
+        preds = self.initialize_list(len(test_data), '')
+        for i in range(len(test_data)):
+            tokens = self.sentence_to_cleaned_words_list(''.join(test_data[i]))
+            pred_label_index = self.get_most_likely_label(tokens)
+            preds[i] += self.labels[pred_label_index]
+        return preds
+
+    def get_most_likely_label(self, words):
+        likelihood = self.initialize_list(self.number_of_labels, 0.)
+        for i in range(self.number_of_labels):
+            prior = self.priors[i]
+            posteriors = 1
+            posterior = 0
+            for j in range(len(words)):
+                try:
+                    index = self.vocabulary.index(words[j])
+                    posterior = self.posteriors[i][index]
+                except:
+                    print('Word', words[j], 'not in vocabulary')
+                    posterior = 0
+                posteriors *= posterior
+            likelihood[i] += (prior * posteriors)
+        return np.argmax(np.array(likelihood))
+
     def compute_posteriors(self, doc_label, label_index):
-        words = self.tokenize(doc_label)
+        words = self.sentence_to_cleaned_words_list(doc_label)
         words_count = len(words)
         no_dup_words = list(dict.fromkeys(words))
         for i in range(len(no_dup_words)):
@@ -53,8 +78,8 @@ class NaiveBayesClassifier:
                 else:
                     j += 1
         for j in range(len(docs)):
-            cleaned_array = list(dict.fromkeys(self.tokenize(docs[j])))
-            docs[j] = ' '.join(cleaned_array)
+            cleaned_list = list(dict.fromkeys(self.sentence_to_cleaned_words_list(docs[j])))
+            docs[j] = ' '.join(cleaned_list)
         return docs, docs_number
 
     def initialize_list(self, size, value):
@@ -72,10 +97,10 @@ class NaiveBayesClassifier:
 
     def extract_vocabulary(self, data):
         sentence = self.convert_to_sentence(data)
-        vocabulary = self.tokenize(sentence)
+        vocabulary = self.sentence_to_cleaned_words_list(sentence)
         return list(dict.fromkeys(vocabulary))
 
-    def tokenize(self, sentence):
+    def sentence_to_cleaned_words_list(self, sentence):
         tokenizer = nlt.tokenize.TreebankWordTokenizer()
         words = tokenizer.tokenize(sentence)
         clean_words = self.clean_unfiltered_punctuation(words)
