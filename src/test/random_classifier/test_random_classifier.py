@@ -1,11 +1,12 @@
-from unittest import TestCase
+import unittest
 from src.main.random_classifier.random_classifier import *
 import numpy as np
 
-class TestRandomClassifier(TestCase):
+class TestRandomClassifier(unittest.TestCase):
 
     min_error_rate = 1.
 
+    @unittest.skip('enable only for saving predictions.')
     def test_save_predictions(self):
         data_import = DataImport()
         clean_train_data = data_import.get_clean_data_set_as_array(data_import.get_train_data_as_tuple())
