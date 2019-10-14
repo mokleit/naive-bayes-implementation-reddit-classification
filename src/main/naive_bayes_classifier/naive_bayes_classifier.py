@@ -1,7 +1,6 @@
 import numpy as np
 import nltk as nlt
 
-
 class NaiveBayesClassifier:
 
     def __init__(self, train_data):
@@ -17,7 +16,7 @@ class NaiveBayesClassifier:
         docs_by_label, docs_number_by_label = self.get_docs_by_label()
 
         #Calculate p(cj) terms
-        total_docs_number = np.array(self.get_docs_by_label()[1]).sum()
+        total_docs_number = np.array(docs_number_by_label).sum()
         self.compute_priors(docs_number_by_label, total_docs_number)
 
         #Calculate p(wk|cj) terms
@@ -37,15 +36,14 @@ class NaiveBayesClassifier:
         for i in range(self.number_of_labels):
             prior = self.priors[i]
             posteriors = 1
-            posterior = 0
             for j in range(len(words)):
+                unknown = False
                 try:
                     index = self.vocabulary.index(words[j])
-                    posterior = self.posteriors[i][index]
                 except:
-                    print('Word', words[j], 'not in vocabulary')
-                    posterior = 0
-                posteriors *= posterior
+                    unknown = True
+                if unknown == False:
+                    posteriors *= self.posteriors[i][index]
             likelihood[i] += (prior * posteriors)
         return np.argmax(np.array(likelihood))
 
@@ -123,3 +121,13 @@ class NaiveBayesClassifier:
         stemmer = nlt.stem.WordNetLemmatizer()
         stemmed = [stemmer.lemmatize(word) for word in words]
         return list(stemmed)
+
+
+    def save_predictions(self, predictions, filename="naive_bayes_classifier_predictions.csv"):
+        indexes = np.arange(0, len(predictions)).astype(str)
+        indexes = np.insert(indexes, 0, ['Id'], 0)
+        predictions = np.insert(predictions, 0, ['Category'], 0)
+
+        preds = np.column_stack((indexes, predictions))
+
+        np.savetxt(filename, preds, fmt="%s", delimiter=',')

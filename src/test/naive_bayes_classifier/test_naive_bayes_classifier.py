@@ -11,9 +11,9 @@ class TestNaivesBayesClassifier(TestCase):
         self.assertEqual(expected, actual)
 
     def test_vocabulary_with_words_to_stem(self):
-        data = np.array([['feet cats foot', 'name'], ['cats my wolf', 'name'], ['wolves talk', 'surprise'], ['talked caress', 'surprise'], ['caresses', 'caress']])
+        data = np.array([['feet cats foot was', 'name'], ['cats my wolf Was', 'name'], ['wolves talk', 'surprise'], ['talked caress', 'surprise'], ['caresses', 'caress']])
         classifier = NaiveBayesClassifier(data)
-        expected = ['foot', 'cat', 'my', 'wolf', 'talk', 'talked', 'caress']
+        expected = ['foot', 'cat', 'wa', 'my', 'wolf', 'Was', 'talk', 'talked', 'caress']
         actual = classifier.extract_vocabulary(data[:, :-1])
         self.assertEqual(expected, actual)
 
@@ -74,7 +74,7 @@ class TestNaivesBayesClassifier(TestCase):
     def test_predict_with_unexisting_words(self):
         data = np.array([['feet', 'body'], ['cats', 'animal'], ['wolves', 'animal'], ['mouth', 'body'], ['obama macron trudeau', 'politics']])
         classifier = NaiveBayesClassifier(data)
-        test_data = [['foot foot mouth'], ['cats foot wolf wolf'], ['obama trudeau merkel']]
+        test_data = [['foot foot mouth hey ho hi'], ['cats foot wolf wolf'], ['obama foot trudeau merkel']]
         expected = ['body', 'animal', 'animal']
         classifier.train()
         actual = classifier.predict(test_data)
