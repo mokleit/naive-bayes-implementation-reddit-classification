@@ -1,6 +1,7 @@
 import unittest
 from src.main.smooth_naive_bayes_classifier.smooth_naive_bayes_classifier import *
 from src.main.data_import import *
+import time
 
 class TestSmoothNaiveBayes(unittest.TestCase):
 
@@ -20,7 +21,24 @@ class TestSmoothNaiveBayes(unittest.TestCase):
         actual = classifier.predict(test_data)
         self.assertEqual(expected, actual)
 
+    def test_performance(self):
+        data_import = DataImport()
+        clean_train_data = data_import.get_clean_data_set_as_array(data_import.get_train_data_as_tuple())
+        classifier = SmoothNaiveBayesClassifier(clean_train_data)
+        t7 = time.clock()
+        classifier.train()
+        t8 = time.clock()
+        print('Training took', t8-t7, 'seconds')
+
     @unittest.skip('enable only for saving predictions.')
+    def test_save_predictions(self):
+        data_import = DataImport()
+        clean_train_data = data_import.get_clean_data_set_as_array(data_import.get_train_data_as_tuple())
+        classifier = SmoothNaiveBayesClassifier(clean_train_data)
+        classifier.train()
+        predictions = classifier.predict(data_import.get_test_data_as_list())
+        classifier.save_predictions("smooth_naive_bayes_classifier_predictions", predictions)
+
     def test_save_predictions(self):
         data_import = DataImport()
         clean_train_data = data_import.get_clean_data_set_as_array(data_import.get_train_data_as_tuple())

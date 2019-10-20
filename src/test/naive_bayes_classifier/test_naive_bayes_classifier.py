@@ -1,51 +1,67 @@
-from unittest import TestCase
+import unittest
 from src.main.naive_bayes_classifier.naive_bayes_classifier import *
+from src.main.data_import import *
 
-class TestNaivesBayesClassifier(TestCase):
+class TestNaivesBayesClassifier(unittest.TestCase):
 
-    def test_extract_tokenized_vocabulary(self):
+    def test_convert_to_sentence(self):
         data = np.array([['my name, isn\'t Joe!', 'name'], ['what\'s his: name?', 'name'], ['I; can\'t believe. it.', 'surprise']])
         classifier = NaiveBayesClassifier(data)
-        expected = ['my', 'name', ',', 'is', 'n\'t', 'Joe', '!', 'what', '\'s', 'his', ':', '?', 'I', ';', 'ca', 'believe', '.', 'it']
-        actual = classifier.extract_vocabulary(data[:, :-1])
+        expected = 'my name, isn\'t Joe! what\'s his: name? I; can\'t believe. it.'
+        actual = classifier.convert_to_sentence(data[:, :-1])
         self.assertEqual(expected, actual)
 
-    def test_vocabulary_with_words_to_stem(self):
-        data = np.array([['feet cats foot was', 'name'], ['cats my wolf Was', 'name'], ['wolves talk', 'surprise'], ['talked caress', 'surprise'], ['caresses', 'caress']])
+    def test_remove_punctuation(self):
+        data = np.array([['my name, isn\'t Joe!', 'name'], ['what\'s his: name?', 'name'], ['I; can\'t believe. it.', 'surprise']])
         classifier = NaiveBayesClassifier(data)
-        expected = ['foot', 'cat', 'wa', 'my', 'wolf', 'Was', 'talk', 'talked', 'caress']
-        actual = classifier.extract_vocabulary(data[:, :-1])
+        expected = 'my name isnt Joe whats his name I cant believe it'
+        sentence = classifier.convert_to_sentence(data[:, :-1])
+        actual = classifier.remove_punctuation(sentence)
         self.assertEqual(expected, actual)
 
-    def test_clean_unfiltered_data(self):
-        classifier = NaiveBayesClassifier(np.array([['hello', 'greetings']]))
-        words = ['he.', 'qa!', 'ggd;', 'ds:', 'df?', 'djdk!']
-        expected = ['he', '.', 'qa', '!', 'ggd', ';', 'ds', ':', 'df', '?', 'djdk', '!']
-        actual = classifier.clean_unfiltered_punctuation(words)
-        self.assertEqual(expected, actual)
-
-    def test_get_docs_by_label(self):
-        data = np.array([['feet', 'name'], ['cats', 'name'], ['wolves', 'surprise'], ['talked', 'surprise'], ['caresses', 'caress']])
+    def test_tokenize_sentence(self):
+        data = np.array([['my name, isn\'t Joe!', 'name'], ['what\'s his: name?', 'name'], ['I; can\'t believe. it.', 'surprise']])
         classifier = NaiveBayesClassifier(data)
-        expected = (['caress', 'foot cat', 'wolf talked'], [1, 2, 2])
-        actual = classifier.get_docs_by_label()
+        expected = ['my','name','isnt','Joe','whats','his','name','I','cant','believe','it']
+        sentence = classifier.convert_to_sentence(data[:, :-1])
+        no_punct_sentence = classifier.remove_punctuation(sentence)
+        actual = classifier.tokenize_sentence(no_punct_sentence)
+        self.assertEqual(expected, actual)
+
+    def test_define_vocabulary(self):
+        data = np.array([['Feet! Cats, foot was,', 'name'], ['Cats my, wolf Was', 'name'], ['Wolves! talk', 'surprise!'], ['talked. caress', 'surprise'], ['caresses', 'caress']])
+        classifier = NaiveBayesClassifier(data)
+        unfiltered_vocabulary = [['Foot', 'Cat', 'Cat', 'foot', 'was',], ['Talked', 'Talk', 'talked', 'talk']]
+        expected = ['foot', 'cat', 'was', 'talked', 'talk']
+        classifier.define_vocabulary(unfiltered_vocabulary)
+        self.assertEqual(expected, classifier.vocabulary)
+
+    def test_split_data_by_label(self):
+        data = np.array([['foot', 'body'], ['cat', 'animal'], ['obama', 'politics'], ['neck', 'body'], ['trudeau', 'politics']])
+        classifier = NaiveBayesClassifier(data)
+        expected = [
+         [['cat']],
+         [['foot'], ['neck']],
+         [['obama'],['trudeau']]
+        ]
+        actual = classifier.split_data_by_label(data)
+        actual = [arr.tolist() for arr in actual]
         self.assertEqual(expected, actual)
 
     def test_compute_priors(self):
         data = np.array([['feet', 'name'], ['cats', 'name'], ['wolves', 'surprise'], ['talked', 'surprise'], ['caresses', 'caress']])
         classifier = NaiveBayesClassifier(data)
-        docs = classifier.get_docs_by_label()
+        train_data_by_label = classifier.split_data_by_label(data)
+        classifier.compute_priors(train_data_by_label)
         expected = ([1 / 5, 2 / 5, 2 / 5])
-        classifier.compute_priors(docs[1], np.array(docs[1]).sum())
         self.assertEqual(expected, classifier.priors)
 
-    def test_compute_posteriors(self):
+    def test_compute_word_frequencies_by_label(self):
         data = np.array([['feet cat', 'name'], ['cats wolf', 'name'], ['wolves', 'surprise']])
         classifier = NaiveBayesClassifier(data)
-        docs = classifier.get_docs_by_label()
-        expected = [[1/3, 1/3, 1/3], [0, 0, 0]]
-        classifier.compute_posteriors(docs[0][0], 0)
-        self.assertEqual(expected, classifier.posteriors)
+        expected = [{'foot': 1, 'wolf': 1 ,'cat': 2}, {'wolf': 1}]
+        classifier.train()
+        self.assertEqual(expected, classifier.word_frequencies_by_label)
 
     def test_initialize_2d_list(self):
         data = np.array([['feet cat', 'name'], ['cats wolf', 'name'], ['wolves', 'surprise']])
@@ -54,32 +70,58 @@ class TestNaivesBayesClassifier(TestCase):
         actual = classifier.initialize_2d_list(3, 3, 0)
         self.assertEqual(expected, actual)
 
-    def test_train(self):
-        data = np.array([['feet', 'name'], ['cats', 'name'], ['wolves', 'surprise'], ['talked', 'surprise'], ['caresses', 'caress']])
+    def test_get_index_of_most_likely_label(self):
+        data = np.array([['feet cat', 'name'], ['cats wolf', 'name'], ['wolves', 'surprise']])
         classifier = NaiveBayesClassifier(data)
-        docs = classifier.get_docs_by_label()
-        expected = [[0.,0.,0.,0.,1.], [0.5, 0.5, 0, 0.,0.], [0.,0.,0.5,0.5,0]]
+        words = ['wolf', 'wolf']
+        expected = 1
         classifier.train()
-        self.assertEqual(expected, classifier.posteriors)
+        actual = classifier.get_index_of_most_likely_label(words)
+        self.assertEqual(expected, actual)
 
     def test_predict(self):
-        data = np.array([['feet', 'name'], ['cats', 'name'], ['wolves', 'surprise'], ['talked', 'surprise'], ['caresses', 'caress']])
+        data = np.array([['Foot neck ear', 'body'], ['ankle', 'body'], ['head leg', 'body'], ['eye', 'body'],
+                         ['football', 'sports'], ['Tennis wrestling', 'sports'], ['golf', 'sports'], ['basketball', 'sports'],
+                         ['trudeau', 'politics'], ['Macron', 'politics'], ['merkel', 'politics'], ['obama', 'politics']])
         classifier = NaiveBayesClassifier(data)
-        test_data = [['caresses'], ['feet cats foot'], ['talked wolves']]
-        expected = ['caress', 'name', 'surprise']
+        test_data = ['Foot leg', 'leg Football golf golf', 'Macron']
+        expected = ['body', 'sports', 'politics']
         classifier.train()
         actual = classifier.predict(test_data)
         self.assertEqual(expected, actual)
 
     def test_predict_with_unexisting_words(self):
-        data = np.array([['feet', 'body'], ['cats', 'animal'], ['wolves', 'animal'], ['mouth', 'body'], ['obama macron trudeau', 'politics']])
+        data = np.array([['foot neck ear ankle ', 'body'], ['ankle neck', 'body'], ['head leg ear ankle', 'body'], ['eye foot leg head', 'body'],
+                         ['football tennis', 'sports'], ['tennis wrestling', 'sports'], ['golf basketball', 'sports'], ['basketball wrestling', 'sports'],
+                         ['trudeau macron', 'politics'], ['macron merkel', 'politics'], ['merkel obama trudeau', 'politics'], ['obama macron', 'politics']])
         classifier = NaiveBayesClassifier(data)
-        test_data = [['foot foot mouth hey ho hi'], ['cats foot wolf wolf'], ['obama foot trudeau merkel']]
-        expected = ['body', 'animal', 'animal']
+        test_data = ['Foot Foot neck hey ho hi', 'tennis Foot golf Basketball', 'Obama Foot Trudeau Merkel']
+        #test_data = ['Obama Foot Trudeau Merkel']
+        expected = ['body', 'sports', 'politics']
+        #expected = ['politics']
         classifier.train()
         actual = classifier.predict(test_data)
         self.assertEqual(expected, actual)
 
+    def test_train(self):
+        data_import = DataImport()
+        data = data_import.get_clean_data_set_as_array(data_import.get_train_data_as_tuple())
+        classifier = NaiveBayesClassifier(data)
+        classifier.train()
 
+    def test_save_predictions(self):
+        data_import = DataImport()
+        data = data_import.get_clean_data_set_as_array(data_import.get_train_data_as_tuple())
+        classifier = NaiveBayesClassifier(data)
+        test_data = data_import.get_test_data_as_list()
+        classifier.train()
+        predictions = classifier.predict(test_data)
+        classifier.save_predictions(np.array(predictions), "smooth_naive_bayes_classifier_predictions.csv")
 
+    def test_predict_split_train_validation_data(self):
+        data = np.array([['foot neck ear ankle ', 'body'], ['ankle neck', 'body'], ['head leg ear ankle', 'body'], ['eye foot leg head', 'body'],
+                         ['football tennis', 'sports'], ['tennis wrestling', 'sports'], ['golf basketball', 'sports'], ['basketball wrestling', 'sports'],
+                         ['trudeau macron', 'politics'], ['macron merkel', 'politics'], ['merkel obama trudeau', 'politics'], ['obama macron', 'politics']])
+        classifier = NaiveBayesClassifier(data)
+        classifier.train()
 

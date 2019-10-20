@@ -3,7 +3,7 @@ from src.main.naive_bayes_classifier.naive_bayes_classifier import *
 class SmoothNaiveBayesClassifier(NaiveBayesClassifier):
 
     def compute_posteriors(self, doc_label, label_index):
-        words = self.sentence_to_cleaned_words_list(doc_label)
+        words = self.tokenize_sentence(doc_label)
         words_count = len(words)
         no_dup_words = list(dict.fromkeys(words))
         for i in range(len(no_dup_words)):
