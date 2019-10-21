@@ -1,5 +1,4 @@
 MO KLEIT
-1061121
 The project is divided into four submodules under main:
     - naive_bayes_classifier (USE THIS TO GET FINAL PREDICTIONS, INSTRUCTIONS BELOW)
     - random_classifier
