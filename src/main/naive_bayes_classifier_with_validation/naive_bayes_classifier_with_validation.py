@@ -20,7 +20,7 @@ class NaiveBayesClassifierWithValidation(NaiveBayesClassifier):
         return errors.sum() / len(preds)
 
 
-def split_train_validation_data(self, train_data):
+def split_train_validation_data(train_data):
     train_len = len(train_data)
     train_quarter = int(0.25*train_len)
     indices1 = np.arange(0, train_quarter)

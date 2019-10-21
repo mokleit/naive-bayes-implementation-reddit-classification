@@ -7,6 +7,7 @@ class TestNaivesBayesClassifier(unittest.TestCase):
 
     #REMOVE ANNOTATION
     #AND EXECUTE ME
+    @unittest.skip
     def test_save_predictions(self):
         data_import = DataImport()
         data = get_clean_data_set_as_array(data_import.get_train_data_as_tuple())

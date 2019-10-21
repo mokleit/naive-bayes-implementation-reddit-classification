@@ -11,7 +11,7 @@ class TestNaivesBayesClassifierWithValidation(unittest.TestCase):
         data = get_clean_data_set_as_array(data_import.get_train_data_as_tuple())
         classifier = NaiveBayesClassifierWithValidation(data, 0.59)
         error_rate = classifier.train()
-        self.assertGreater(error_rate, 0.5)
+        self.assertLess(error_rate, 0.5)
 
 
 
