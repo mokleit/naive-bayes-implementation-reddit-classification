@@ -14,7 +14,6 @@ class TestRandomClassifier(unittest.TestCase):
         predictions = classifier.predict_weighted(data_import.get_test_data_as_list())
         classifier.save_predictions(predictions)
 
-
     def test_predictions(self):
         train_data = np.ones((10, 2))
         test_data = np.ones((10, 2))
@@ -27,7 +26,6 @@ class TestRandomClassifier(unittest.TestCase):
 
         actual = RandomClassifier(train_data).predict(test_data)
         self.assertEqual(len(actual), len(test_data))
-
 
     def test_error(self):
         train_data = np.ones((10, 2))

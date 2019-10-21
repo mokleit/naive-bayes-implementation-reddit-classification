@@ -1,1 +1,64 @@
+The project is divided into four submodules under main:
+    - random_classifier
+    - naive_bayes_classifier
+    - naive_bayes_classifier_with_validation
+    - resources
 
+Each module has its corresponding test_module under the folder test except for the resources module.
+
+naive_bayes_classifier:
+This is the naive bayes implementation of our classifier. It takes the train data as a 2d numpy array (examples * label) and
+an alpha parameter corresponding to the smoothing value.
+The following explains how the code is organized:
+
+    1. Training phase
+        a. Splits the train data by an array of arrays containing all examples of same label
+        b. Compute the priors
+        c. Cleans the data (punctuation, lowers words, lemmatizes words)
+        d. Defines the vocabulary
+        e. Creates list of dictionaries each keeping count of word occurences for each label
+
+    2. Prediction phase
+        a. Receives test data
+        b. For each test example:
+            i. Cleans the words using the same criteria as for training data
+            ii. Gets index of most likely label by calling get_index_of_most_likely_label()
+                    - Computes likelihoods for each label and returns index of highest likelihood
+        c. Stores predictions in list
+
+Here's a sample code to run it:
+
+        data_import = DataImport()
+        data = data_import.get_clean_data_set_as_array(data_import.get_train_data_as_tuple())
+        classifier = NaiveBayesClassifier(data)
+        test_data = data_import.get_test_data_as_list()
+        classifier.train()
+        predictions = classifier.predict(test_data)
+        classifier.save_predictions(np.array(predictions))
+
+You can also go in the test_random_classifier.py under src/test/naive_bayes_classifier/naive_bayes_classifier.py and
+remove the @unittest.skip from the test_save_predictions test.
+
+naive_bayes_classifier_with_validation:
+This class extends naive_bayes_classifier and splits the train data in train and validation set.
+Tests the trained classifier using the validation set and returns the error rate.
+
+random_classifier:
+This is a simple classifier that takes train data during instantiation of the class to find the unique existing labels.
+It has a "predict" method implemented that takes the test data and randomly selects a label from the list of existing labels
+for each test example. It returns the prediction as a list.
+It also has a "predict_weighted" method that randomly selects from a list of weighted labels (improves accuracy).
+
+Here's a sample code to run it:
+
+        data_import = DataImport()
+        clean_train_data = data_import.get_clean_data_set_as_array(data_import.get_train_data_as_tuple())
+        classifier = RandomClassifier(clean_train_data)
+        predictions = classifier.predict_weighted(data_import.get_test_data_as_list())
+        classifier.save_predictions(predictions) #will store predictions as a csv in current directory
+
+You can also go in the test_random_classifier.py under src/test/random_classifier/test_random_classifier.py and
+remove the @unittest.skip from the test save_predictions.
+
+data_import:
+This python class is used to fetch the data and return it in a processable form for the classifiers.

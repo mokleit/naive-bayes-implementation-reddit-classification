@@ -3,6 +3,7 @@ from src.main.data_import import *
 from datetime import datetime
 random.seed(datetime.now())
 
+
 class RandomClassifier:
 
     def __init__(self, train_data):
