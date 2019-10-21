@@ -5,16 +5,27 @@ from src.main.data_import import *
 
 class TestNaivesBayesClassifier(unittest.TestCase):
 
+    #REMOVE ANNOTATION
+    #AND EXECUTE ME
+    def test_save_predictions(self):
+        data_import = DataImport()
+        data = get_clean_data_set_as_array(data_import.get_train_data_as_tuple())
+        classifier = NaiveBayesClassifier(data, 0.59)
+        test_data = data_import.get_test_data_as_list()
+        classifier.train()
+        predictions = classifier.predict(test_data)
+        save_predictions(np.array(predictions), "smooth_naive_bayes_classifier_predictions.csv")
+
     def test_convert_to_sentence(self):
         data = ['Hello, you!', 'My name is Name Name.', 'What\'s yours?']
         expected = 'Hello, you! My name is Name Name. What\'s yours?'
-        actual = NaiveBayesClassifier.convert_to_sentence(data)
+        actual = convert_to_sentence(data)
         self.assertEqual(expected, actual)
 
     def test_remove_punctuation(self):
         sentence = 'Hello, you! My name is Name Name. What\'s yours?'
         expected = 'Hello you My name is Name Name Whats yours'
-        actual = NaiveBayesClassifier.remove_punctuation(sentence)
+        actual = remove_punctuation(sentence)
         self.assertEqual(expected, actual)
 
     def test_define_vocabulary(self):
@@ -81,7 +92,7 @@ class TestNaivesBayesClassifier(unittest.TestCase):
         actual = classifier.predict(test_data)
         self.assertEqual(expected, actual)
 
-    def test_predict_with_unseen_words_in_Test(self):
+    def test_predict_with_unseen_words_in_test_data(self):
         data = np.array([['foot neck ear ankle ', 'body'], ['ankle neck', 'body'], ['head leg ear ankle', 'body'], ['eye foot leg head', 'body'],
                          ['football tennis', 'sports'], ['tennis wrestling', 'sports'], ['golf basketball', 'sports'], ['basketball wrestling', 'sports'],
                          ['trudeau macron', 'politics'], ['macron merkel', 'politics'], ['merkel obama trudeau', 'politics'], ['obama macron', 'politics']])
@@ -91,14 +102,4 @@ class TestNaivesBayesClassifier(unittest.TestCase):
         classifier.train()
         actual = classifier.predict(test_data)
         self.assertEqual(expected, actual)
-
-    @unittest.skip
-    def test_save_predictions(self):
-        data_import = DataImport()
-        data = data_import.get_clean_data_set_as_array(data_import.get_train_data_as_tuple())
-        classifier = NaiveBayesClassifier(data, 0.59)
-        test_data = data_import.get_test_data_as_list()
-        classifier.train()
-        predictions = classifier.predict(test_data)
-        classifier.save_predictions(np.array(predictions), "smooth_naive_bayes_classifier_predictions.csv")
 

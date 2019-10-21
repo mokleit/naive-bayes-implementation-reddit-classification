@@ -2,6 +2,7 @@ import unittest
 from src.main.random_classifier.random_classifier import *
 import numpy as np
 
+
 class TestRandomClassifier(unittest.TestCase):
 
     min_error_rate = 1.
@@ -9,10 +10,10 @@ class TestRandomClassifier(unittest.TestCase):
     @unittest.skip('enable only for saving predictions.')
     def test_save_predictions(self):
         data_import = DataImport()
-        clean_train_data = data_import.get_clean_data_set_as_array(data_import.get_train_data_as_tuple())
+        clean_train_data = get_clean_data_set_as_array(data_import.get_train_data_as_tuple())
         classifier = RandomClassifier(clean_train_data)
         predictions = classifier.predict_weighted(data_import.get_test_data_as_list())
-        classifier.save_predictions(predictions)
+        save_predictions(predictions)
 
     def test_predictions(self):
         train_data = np.ones((10, 2))
@@ -41,7 +42,7 @@ class TestRandomClassifier(unittest.TestCase):
 
         for j in range(1000):
             predictions = classifier.predict(test_data[:, :-1])
-            error_rate = classifier.get_error(predictions, test_data[:, -1])
+            error_rate = get_error(predictions, test_data[:, -1])
             if error_rate < self.min_error_rate:
                 self.min_error_rate = error_rate
         self.assertIs(type(error_rate), np.float64)
