@@ -11,6 +11,7 @@ Each module has its corresponding test_module under the folder src/test except f
 -------------------------------------------------------------------------------------------------------------------
 NAIVE BAYES CLASSIFIER, module naive_bayes_classifier
 THIS IS THE CLASS TO EXECUTE IN ORDER TO GET THE PREDICTIONS SUBMITTED ON KAGGLE, ALPHA=0.59
+SET ALPHA TO 0.0 TO REMOVE SMOOTHING
 
 This is the naive bayes implementation of our classifier. It takes the train data as a 2d numpy array (examples * label)
 created using data_import (explained at the end of the readme) and an alpha parameter corresponding to the smoothing value.
