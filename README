@@ -1,4 +1,6 @@
-MO KLEIT
+# NAIVE BAYES IMPLEMENTATION FOR TEXT CLASSIFICATION
+
+## STRUCTURE
 The project is divided into four submodules under main:
     - naive_bayes_classifier (USE THIS TO GET FINAL PREDICTIONS, INSTRUCTIONS BELOW)
     - random_classifier
@@ -7,10 +9,14 @@ The project is divided into four submodules under main:
 
 Each module has its corresponding test_module under the folder src/test except for the resources module.
 
--------------------------------------------------------------------------------------------------------------------
-NAIVE BAYES CLASSIFIER, module naive_bayes_classifier
+## NAIVE BAYES CLASSIFIER
+
+### module naive_bayes_classifier
+
 THIS IS THE CLASS TO EXECUTE IN ORDER TO GET THE PREDICTIONS SUBMITTED ON KAGGLE, ALPHA=0.59
 SET ALPHA TO 0.0 TO REMOVE SMOOTHING
+
+### IMPLEMENTATION
 
 This is the naive bayes implementation of our classifier. It takes the train data as a 2d numpy array (examples * label)
 created using data_import (explained at the end of the readme) and an alpha parameter corresponding to the smoothing value.
@@ -37,7 +43,7 @@ The following explains how the code is organized:
         A lot of tasks, such as cleaning the data (removing punctuation, tokenizing), initializing lists were split
         in different methods.
 
-HOW TO RUN IT
+## HOW TO RUN
 
 RUN THE TEST ALREADY WRITTEN UNDER src/test/naive_bayes_classifier/test_naive_bayes_classifier.py
 REMOVE THE @unittest.skip FROM THE TEST_SAVE_PREDICTIONS TEST AND EXECUTE THE TEST.
@@ -58,14 +64,17 @@ CODE TO EXECUTE FROM OTHER .py FILE
         classifier.save_predictions(np.array(predictions)) # will save the predictions in current directory
 
 
--------------------------------------------------------------------------------------------------------------------
+## NAIVE BAYES CLASSIFIER WITH VALIDATION
 
-NAIVE BAYES CLASSIFIER WITH VALIDATION, module = naive_bayes_classifier_with_validation
+### module = naive_bayes_classifier_with_validation
+
 Tests the trained classifier using the validation set and returns the error rate.
 This class extends naive_bayes_classifier and splits the train data in train and validation set. The training set is executed on 98%
 of the initial train data provided and the remaining examples are used as test data to get a sense of the accuracy of our classifier.
 In order, to change the proportion of train and test data, simply change the value of the percentage variable in
 the split_train_validation_data() method.
+
+### HOW TO RUN
 
 Sample code to run it is as follows:
         data_import = DataImport()
@@ -78,13 +87,16 @@ OR
 Remove the @unittest.skip annotation from the test_train in the test_naive_bayes_classifier_with_validation
 and execute the test.
 
--------------------------------------------------------------------------------------------------------------------
+## RANDOM CLASSIFIER
 
-RANDOM CLASSIFIER, module = random_classifier
+### module = random_classifier
+
 This is a simple classifier that takes train data during instantiation of the class to find the unique existing labels.
 It has a "predict" method implemented that takes the test data and randomly selects a label from the list of existing labels
 for each test example. It returns the prediction as a list.
 It also has a "predict_weighted" method that randomly selects from a list of weighted labels (improves accuracy).
+
+### HOW TO RUN
 
 Here's a sample code to run it:
 
@@ -93,11 +105,14 @@ Here's a sample code to run it:
         classifier = RandomClassifier(clean_train_data)
         predictions = classifier.predict_weighted(data_import.get_test_data_as_list())
         classifier.save_predictions(predictions) #will store predictions as a csv in current directory
+        
+or
 
 You can also go in the test_random_classifier.py under src/test/random_classifier/test_random_classifier.py and
 remove the @unittest.skip from the test save_predictions.
 
--------------------------------------------------------------------------------------------------------------------
+## DATA IMPORT
 
-DATA IMPORT, data_import.py
+### module = data_import.py
+
 This python class is used to fetch the data and return it in a processable form for the classifiers.
